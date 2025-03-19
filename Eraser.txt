@@ -1,0 +1,295 @@
+Emilia Gallo Alzate
+Maria Ximena Marin Delgada
+
+// title
+title Base de Datos Simplificada
+
+// define tables
+users [icon: user, color: red]{
+  idUsuario number pk
+  username string unique
+  correo string unique
+  password string
+  nombreCompleto string
+  telefono string
+  direccion string
+  fotoPerfil string
+  nombreEmpresa string
+  nit string unique
+  estado string
+  rol string
+  createdAt timestamp
+  updatedAt timestamp
+  deletedAt timestamp
+}
+
+aute [icon: check, color: red]{
+  idSeguridad int pk
+  idUsuario number fk // Relación con la tabla users
+  googleId string unique
+  token string
+  fechaSolicitud timestamp
+  fechaExpiracion timestamp
+  usado boolean
+  confirmado boolean
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+// Relación uno a uno
+users.idUsuario - aute.idUsuario
+
+roles [icon: key, color: red]{
+  idRol int pk
+  idUsuario number fk // Relación con la tabla users (equipo de trabajo)
+  asignadoPor number fk // Relación con la tabla users (empresa que asigna el permiso)
+  rol enum('editor', 'lector', 'comentarista')
+  permisos json
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+// Relación uno a muchos empresa --> equipo de trabajo
+users.idUsuario > roles.idUsuario
+users.idUsuario > roles.asignadoPor
+
+notificaciones [icon: bell, color: teal]{
+  idNotificacion int pk
+  idUsuario number fk // Relación con la tabla users
+  tipo enum('general', 'solicitud', 'recomendacion')
+  titulo string
+  mensaje text
+  fechaEnvio timestamp
+  leida boolean
+}
+
+// Relación uno a muchos
+users.idUsuario > notificaciones.idUsuario
+
+histoVenta [icon: trending-up, color: blue]{
+  idVenta number pk
+  idProducto number fk
+  cantidadVendida number
+  fechaVenta date
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+productos.id > histoVenta.idProducto
+
+recorStock [icon: bell, color: blue]{
+  idRecordatorio number pk
+  idProducto number fk
+  cantidadMinima number
+  fechaRecordatorio date
+  estado enum('pendiente', 'atendido')
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+productos.id > recorStock.idProducto
+
+comentarios [icon: message-circle, color: blue]{
+  idComentario number pk
+  idUsuario number fk
+  comentario text
+  fechaComentario timestamp
+  estado enum('pendiente', 'revisado')
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+users.idUsuario > comentarios.idUsuario
+
+soporte [icon: headset, color: teal]{
+  idSoporte int pk
+  idUsuario int fk
+  asunto string
+  descripcion text
+  estado enum('pendiente', 'en_proceso', 'resuelto')
+  respuesta text
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+users.idUsuario > soporte.idUsuario
+
+ajustInven [icon: refresh-cw, color: teal]{
+  idAjuste int pk
+  idProducto int fk
+  idUsuario int fk
+  cantidadAnterior int
+  cantidadNueva int
+  motivo string
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+productos.id > ajustInven.idProducto
+users.idUsuario > ajustInven.idUsuario
+
+
+
+
+
+
+rutas [icon: route, color: orange]{
+  id number pk
+  nombreRuta string // Nombre de la ruta
+  descripcion string // Descripción de la ruta
+  ruta string // La ruta amigable
+  creadoEn timestamp
+  actualizadoEn timestamp
+}
+
+errores [icon: bug, color: orange]{
+  id number pk
+  tipoError string // Tipo de error (ej. '404', 'timeout', 'server error')
+  descripcion string // Descripción del error
+  stackTrace string // Información detallada del error
+  fecha timestamp // Fecha y hora del error
+}
+
+
+alertVen [icon: bell, color: orange]{
+  idAlerta number pk
+  idProducto number fk // Relación con la tabla productos
+  fechaAlerta date
+  estado enum('pendiente', 'atendida')
+  createdAt timestamp
+  updatedAt timestamp
+  //s
+}
+//uno a muchos
+productos.id > alertVen.idProducto 
+
+
+comentarios [icon: file-text, color: purple]{
+  id_comentarios number pk
+  resenas string
+  observaciones string
+  createdAt timestamp
+  updatedAt timestamp
+  delateAt timestamp
+}
+
+productos [icon: box, color: purple]{
+  id number pk
+  codigoBarras string unique
+  codigoQR string unique
+  nombre string
+  descripcion string
+  categoriaId number fk
+  cantidad number
+  precio decimal
+  fechaAdquisicion date
+  fechaVencimiento date
+  usuarioId number fk
+  estado string
+  imagen string
+  createdAt timestamp
+  updatedAt timestamp
+  eliminadoEn timestamp
+  //s
+}
+
+// Relación uno a muchos (usuario --> productos)
+users.idUsuario > productos.usuarioId
+
+escaneos [icon: barcode, color: purple]{
+  id number pk
+  codigoBarras string fk
+  usuarioId number fk
+  fechaEscaneo timestamp
+  resultado string
+  imagen string
+}
+
+// Relación uno a muchos (usuario --> escaneos)
+users.idUsuario > escaneos.usuarioId
+// Relación uno a muchos (producto --> escaneos)
+productos.codigoBarras > escaneos.codigoBarras
+
+etiquetas [icon: tag, color: purple]{
+  id number pk
+  productoId number fk
+  tipo string
+  contenido string
+}
+
+// Relación uno a muchos (producto --> etiquetas)
+productos.id > etiquetas.productoId
+
+colaboraciones [icon: star, color: purple]{
+  id number pk
+  productoId number fk
+  marca string
+  tarifa decimal
+  fechaInicio date
+  fechaFin date
+}
+
+// Relación uno a muchos (producto --> colaboraciones)
+productos.id > colaboraciones.productoId
+
+histInv [icon: history, color: orange]{
+  id number pk
+  productoId number fk
+  usuarioId number fk
+  accion enum('agregado', 'modificado', 'eliminado')
+  cantidad_anterior number
+  cantidad_nueva number
+  precio_anterior decimal
+  precio_nuevo decimal
+  fechaCambio timestamp
+}
+
+// Relación uno a muchos (producto --> historial de cambios)
+productos.id > histInv.productoId
+// Relación uno a muchos (usuario --> historial de cambios)
+users.idUsuario > histInv.usuarioId
+
+api_logs [icon: server, color: orange]{
+  id number pk
+  endpoint string
+  metodo enum('GET', 'POST', 'PUT', 'DELETE') 
+  statusCode number
+  tiempoRespuesta decimal
+  fecha timestamp
+  errorMensaje string
+  usuarioId number fk
+}
+
+// Relación uno a muchos usuario --> registros de logs
+users.idUsuario > api_logs.usuarioId
+
+// monitoria Auditoria y rendimiento
+MonAudRend [icon: clipboard, color: orange]{
+  id number pk
+  tipoEvento enum('evento', 'error', 'metrica') // Indica si es un evento, error o métrica
+  nombreEvento string // Nombre del evento, error o métrica (ej. 'inicio sesión', 'error 404', 'tiempo de carga')
+  descripcion string // Descripción detallada del evento, error o métrica
+  usuarioId number fk // Relación con el usuario que generó la acción
+  fecha timestamp // Fecha y hora en la que ocurrió el evento o se midió la métrica
+  ip_address string // Dirección IP desde la cual ocurrió el evento o se registró la métrica
+  nivel string // Nivel de gravedad o importancia (ej. 'bajo', 'medio', 'alto', 'informativo')
+  valor decimal // Valor de la métrica (si aplica, ej. tiempo de carga en segundos, uso de CPU)
+  stackTrace string // Para errores, la traza del error
+  //s
+}
+
+// Relación uno a muchos (usuario --> monitor_auditoria_rendimiento)
+users.idUsuario > MonAudRend.usuarioId
+
+
+auditoria [icon: clipboard, color: orange]{
+  id number pk
+  evento string // Descripción del evento (ej. 'inicio de sesión', 'carga de página')
+  usuarioId number fk // Relación con la tabla users (quién inició el evento)
+  descripcion string // Descripción detallada del evento
+  fecha timestamp // Fecha y hora del evento
+  //s
+}
+
+// Relación uno a muchos (usuario --> auditoría)
+users.idUsuario > auditoria.usuarioId
