@@ -1,0 +1,230 @@
+Maria Ximena Marin Delgado
+Emilia Gallo Alzate
+
+
+CREATE TABLE users (
+    idUsuario SERIAL PRIMARY KEY,
+    username VARCHAR UNIQUE NOT NULL,
+    correo VARCHAR UNIQUE NOT NULL,
+    password VARCHAR NOT NULL,
+    nombreCompleto VARCHAR,
+    telefono VARCHAR,
+    direccion VARCHAR,
+    fotoPerfil VARCHAR,
+    nombreEmpresa VARCHAR,
+    nit VARCHAR UNIQUE,
+    estado VARCHAR,
+    rol VARCHAR,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP,
+    deletedAt TIMESTAMP
+);
+
+CREATE TABLE aute (
+    idSeguridad SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario) UNIQUE,
+    googleId VARCHAR UNIQUE,
+    token VARCHAR,
+    fechaSolicitud TIMESTAMP,
+    fechaExpiracion TIMESTAMP,
+    usado BOOLEAN,
+    confirmado BOOLEAN,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE roles (
+    idRol SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    asignadoPor INTEGER REFERENCES users(idUsuario),
+    rol VARCHAR CHECK (rol IN ('editor', 'lector', 'comentarista')),
+    permisos JSON,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE notificaciones (
+    idNotificacion SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    tipo VARCHAR CHECK (tipo IN ('general', 'solicitud', 'recomendacion')),
+    titulo VARCHAR,
+    mensaje TEXT,
+    fechaEnvio TIMESTAMP,
+    leida BOOLEAN
+);
+
+CREATE TABLE productos (
+    id SERIAL PRIMARY KEY,
+    codigoBarras VARCHAR UNIQUE,
+    codigoQR VARCHAR UNIQUE,
+    nombre VARCHAR,
+    descripcion VARCHAR,
+    categoriaId INTEGER,
+    cantidad INTEGER,
+    precio DECIMAL,
+    fechaAdquisicion DATE,
+    fechaVencimiento DATE,
+    usuarioId INTEGER REFERENCES users(idUsuario),
+    estado VARCHAR,
+    imagen VARCHAR,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP,
+    eliminadoEn TIMESTAMP
+);
+
+CREATE TABLE histoVenta (
+    idVenta SERIAL PRIMARY KEY,
+    idProducto INTEGER REFERENCES productos(id),
+    cantidadVendida INTEGER,
+    fechaVenta DATE,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE recorStock (
+    idRecordatorio SERIAL PRIMARY KEY,
+    idProducto INTEGER REFERENCES productos(id),
+    cantidadMinima INTEGER,
+    fechaRecordatorio DATE,
+    estado VARCHAR CHECK (estado IN ('pendiente', 'atendido')),
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE comentarios (
+    idComentario SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    comentario TEXT,
+    fechaComentario TIMESTAMP,
+    estado VARCHAR CHECK (estado IN ('pendiente', 'revisado')),
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE soporte (
+    idSoporte SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    asunto VARCHAR,
+    descripcion TEXT,
+    estado VARCHAR CHECK (estado IN ('pendiente', 'en_proceso', 'resuelto')),
+    respuesta TEXT,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE ajustInven (
+    idAjuste SERIAL PRIMARY KEY,
+    idProducto INTEGER REFERENCES productos(id),
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    cantidadAnterior INTEGER,
+    cantidadNueva INTEGER,
+    motivo VARCHAR,
+    createdAt TIMESTAMP,
+    updatedAt TIMESTAMP
+);
+
+CREATE TABLE etiquetas (
+    id SERIAL PRIMARY KEY,
+    productoId INTEGER REFERENCES productos(id),
+    tipo VARCHAR,
+    contenido VARCHAR
+);
+
+CREATE TABLE colaboraciones (
+    id SERIAL PRIMARY KEY,
+    productoId INTEGER REFERENCES productos(id),
+    marca VARCHAR,
+    tarifa DECIMAL,
+    fechaInicio DATE,
+    fechaFin DATE
+);
+
+CREATE TABLE histInv (
+    id SERIAL PRIMARY KEY,
+    productoId INTEGER REFERENCES productos(id),
+    usuarioId INTEGER REFERENCES users(idUsuario),
+    accion VARCHAR CHECK (accion IN ('agregado', 'modificado', 'eliminado')),
+    cantidad_anterior INTEGER,
+    cantidad_nueva INTEGER,
+    precio_anterior DECIMAL,
+    precio_nuevo DECIMAL,
+    fechaCambio TIMESTAMP
+);
+
+CREATE TABLE api_logs (
+    id SERIAL PRIMARY KEY,
+    endpoint VARCHAR,
+    metodo VARCHAR CHECK (metodo IN ('GET', 'POST', 'PUT', 'DELETE')),
+    statusCode INTEGER,
+    tiempoRespuesta DECIMAL,
+    fecha TIMESTAMP,
+    errorMensaje VARCHAR,
+    usuarioId INTEGER REFERENCES users(idUsuario)
+);
+
+CREATE TABLE MonAudRend (
+    id SERIAL PRIMARY KEY,
+    tipoEvento VARCHAR CHECK (tipoEvento IN ('evento', 'error', 'metrica')),
+    nombreEvento VARCHAR,
+    descripcion VARCHAR,
+    usuarioId INTEGER REFERENCES users(idUsuario),
+    fecha TIMESTAMP,
+    ip_address VARCHAR,
+    nivel VARCHAR,
+    valor DECIMAL,
+    stackTrace VARCHAR
+);
+
+CREATE TABLE auditoria (
+    id SERIAL PRIMARY KEY,
+    evento VARCHAR,
+    usuarioId INTEGER REFERENCES users(idUsuario),
+    descripcion VARCHAR,
+    fecha TIMESTAMP
+);
+
+CREATE TABLE errores (
+    idError SERIAL PRIMARY KEY,
+    mensaje VARCHAR,
+    severidad VARCHAR CHECK (severidad IN ('baja', 'media', 'alta')),
+    fecha TIMESTAMP
+);
+
+CREATE TABLE rutas (
+    idRuta SERIAL PRIMARY KEY,
+    nombre VARCHAR,
+    descripcion VARCHAR,
+    metodo VARCHAR CHECK (metodo IN ('GET', 'POST', 'PUT', 'DELETE'))
+);
+
+CREATE TABLE alertVen (
+    idAlerta SERIAL PRIMARY KEY,
+    idProducto INTEGER REFERENCES productos(id),
+    fechaAlerta DATE,
+    estado VARCHAR CHECK (estado IN ('pendiente', 'enviado'))
+);
+
+CREATE TABLE escaneos (
+    idEscaneo SERIAL PRIMARY KEY,
+    idUsuario INTEGER REFERENCES users(idUsuario),
+    codigoEscaneado VARCHAR,
+    fechaEscaneo TIMESTAMP
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
